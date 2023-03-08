@@ -1,0 +1,354 @@
+---
+title: "FlareOn 9 - Challenge 10 Writeup"
+description: "Write up of the 'Encryptor' Challenge"
+pubDate: "November 15 2022"
+---
+
+import Latex from '../../components/Latex.astro'
+
+# Challenge Setup
+
+Challenge Name: Encryptor
+- flareon.exe
+- Suspicious.txt.Encrypted
+
+First thing I did was to open the binary `flareon.exe` in ghidra to get 
+a basic idea of what the binary does. 
+From this, I learned that the program will try to encrypt the files passed 
+in via the commandline.
+Invoking the program in cmd.exe like so:
+
+```
+flareon.exe file1.EncryptMe file2.EncryptMe
+```
+
+will produce the files:
+- file1.Encrypted
+- file2.Encrypted
+
+It follows that the provided `SuspiciousFile.txt.Encrypted` has been encrypted
+using `flareon.exe`. Additionally the program will write the following informative text to a file
+called `HOW_TO_DECRYPT.txt` after it has completed its work:
+
+```c
+void encrypt(FILE *output,FILE *input)
+{
+  ulonglong mystery [17] = {0};
+
+  byte nonce [12] = {0};
+  int counter = 0;
+  byte key [32] = {0};
+  
+  // generate random values for the key and the nonce 
+  (*RtlGenRandom)(key,0x20);
+  (*RtlGenRandom)(nonce,0xc);
+
+  // encrypt the file contents and write the encrypted data to the output file
+  chacha20_encryption(output,input, key, counter, nonce);
+
+  // derive a "mystery" value from the key, counter, nonce and global variables d and n
+  // i will go more into what is happening here later..
+  pow_mod(mystery, key, &d, &n);
+
+  // append values, necessary for recovery of the encrypted data
+  print_hex(output,(longlong)part1);
+  putc(10,output);
+
+  print_hex(output,(longlong)&n);
+  putc(10,output);
+
+  print_hex(output,(longlong)&part3);
+  putc(10,output);
+
+  print_hex(output,(longlong)mystery);
+  putc(10,output);
+
+  return;
+}
+```
+
+The function generates a 256-bit long random key and a 
+96-bit long random nonce and passes that on to
+the `chacha20_encryption`
+function which writes the encrypted content of the input
+file to the output file.
+Then, the `encrypt` function also writes the values of the variables
+
+- part1
+- <Latex formula='n'></Latex>
+- part3
+- <Latex formula='\text{mystery}  \equiv (\text{key|counter|nonce})^{d}\quad{}(\text{mod } n)'></Latex>
+
+as hexstrings seperated by newlines to the output file. (The | here denotes concatenation)
+
+The variables
+- part1
+- <Latex formula='n'></Latex>
+- part3
+- <Latex formula='d'></Latex>
+are globals, which are set at the start of the program.
+A subset of these is also written to the How-to-File.
+The values will play an 
+important role in decrypting the contents of the suspicuous file later.
+
+For now let's turn our attention to the actual encryption method implemented in `chacha20_encryption`.
+The pseudo c-code of which is shown here:
+```c
+struct state {
+    char constant[16];
+    int key[8];
+    int counter;
+    int nonce[3];
+}
+
+int chacha20_encryption(FILE *output, FILE *input, int *key, int counter, int * nonce) {
+
+  state hash_state;
+  uint key_stream [16];
+  byte block [64];
+  longlong idx;
+  int bytes_read;
+
+  size_t sVar2;
+  int local_104;
+
+  // setup state for the hash function
+  hash_state.constant = "expand 32-byte k";
+  hash_state.key[0] = *key;
+  hash_state.key[1] = key[1];
+  hash_state.key[2] = key[2];
+  hash_state.key[3] = key[3];
+  hash_state.key[4] = key[4];
+  hash_state.key[5] = key[5];
+  hash_state.key[6] = key[6];
+  hash_state.key[7] = key[7];
+  hash_state.counter = counter;
+  hash_state.nonce[0] = nonce[0];
+  hash_state.nonce[1] = nonce[1];
+  hash_state.nonce[2] = nonce[2];
+
+  while( true ) {
+    // read in a 64-bytes long `block` of data, exit the loop if no data left 
+    // or if there was an error
+    sVar2 = fread(block,1,0x40,input);
+    bytes_read = (int)sVar2;
+    if (bytes_read < 1) break;
+
+    // derive the key_stream
+    chacha20_block(key_stream,(uint *)&hash_state);
+
+    // encrypt the current block by xoring the `key_stream` with the `block`
+    idx = 0;
+    do {
+      block[idx] = block[idx] ^ *(byte *)((longlong)key_stream + idx);
+      idx = idx + 1;
+    } while ((int)idx < bytes_read);
+
+    // write out the encrypted `block` to the output file
+    fwrite(block,1,(longlong)bytes_read,output);
+
+    // increment the counter in the `hash_state`
+    hash_state.counter = hash_state.counter + 1;
+    local_104 = bytes_read;
+  }
+  return local_104;
+}
+```
+
+This function implements the [ChaCha20 Encryption Algorithm](https://datatracker.ietf.org/doc/html/rfc7539#section-2.4).
+This algorithm is a stream cipher that uses a 256-bit long key and a 96-bit 
+long nonce.
+It goes through the input file in 64-byte long blocks. For each block a
+key_stream is derived from the passed in key, nonce and the counter.
+The key_stream is then xor-ed byte by byte against the block, yielding each iteration an 
+encrypted block which is then written to the output file. The 
+counter is increased by one for each 
+block that has been encrypted.
+
+Googling the constant "expand 32-byte k", I learned that 
+the constant "expand 32-byte k" is commonly associated with the 
+[Salsa20](https://en.wikipedia.org/wiki/Salsa20)
+family of hash functions in which this string is part of the initial state
+of the hash function's algorithm.
+The string being contiguous on the stack implies that the hash function 
+could be Chacha20.
+Comparing the decompilation of the 
+`chacha20_block`
+function to the ChaCha20 algorithm indeed confirms that the hash function is
+Chacha20.
+I then read the ChaCha20
+[RFC7539](https://datatracker.ietf.org/doc/html/rfc7539)
+which describes
+[ChaCha20 Encryption Algorithm](https://datatracker.ietf.org/doc/html/rfc7539#section-2.4)
+which in turn I found to be identical to the functionality 
+implemented by `chacha20_encryption`.
+
+## How to recover the key used for the ChaCha20 Encryption?
+
+So we now know how that the ChaCha20 encryption is used to encrypt the file contents but how is it possible to 
+recover the key?
+
+To recap: To the encrypted data, following values are appended
+
+- part1
+- <Latex formula='n'></Latex>
+- part3
+- <Latex formula='\text{mystery}  \equiv (\text{key|counter|nonce})^{d}\quad{}(\text{mod } n)'></Latex>
+
+We'll be focusing exclusively on:
+
+- <Latex formula='n'></Latex>
+- <Latex formula='d'></Latex>
+- mystery
+
+as that is all what is needed for solving the challenge.
+
+The values of <Latex formula='n'></Latex> and <Latex formula='d'></Latex>
+are computed once at the very start of the progam in a function I called
+`init`. Again I have already labeled all of the functions and variables 
+from the ghidra decompilation output.
+
+```c
+void init(void) {
+
+  undefined8 is_prime;
+  ulonglong p [17];
+  ulonglong q [17];
+  ulonglong pm1 [17];
+  ulonglong qm1 [17];
+  ulonglong phi [17];
+  undefined8 local_a0 [17];
+  
+  // roll random numbers until one passes the primality test 
+  // the primality test used is likely Miller-Rabin
+  do {
+    roll_for_prime(p);
+    is_prime = primality_test(p);
+  } while ((int)is_prime == 0);
+
+  // roll random numbers until one passes the primality test 
+  do {
+    roll_for_prime(q);
+    is_prime = primality_test(q);
+  } while ((int)is_prime == 0);
+
+  // compute the rsa-parameter n from the primes p and q
+  multiply_bigints((ulonglong *)&n,p,q);
+
+  // compute phi, the value of the euler totient function at n
+  big_int_subtract_one((longlong *)pm1,p);
+  big_int_subtract_one((longlong *)qm1,q);
+  multiply_bigints(phi,pm1,qm1);
+
+  // compute the private exponent d by finding the modular multiplicative inverse of the 
+  // public exponent 0x10001 modulo phi (d is initialized to 0x10001)
+  modulo_inverse((undefined4 *)&d,(undefined4 *)&d,phi);
+
+  return;
+}
+```
+
+The `init` function generates the private
+[RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem))-key <Latex formula='(n,d)'></Latex>
+
+It does so by randomly generating random numbers \(p\) and \(q\) so long until
+both of them pass a primality test. I did not fully reverse the primality 
+test but I have a strong suspicion that it is 
+[Miller-Rabin](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test)
+
+The (probable-) primes <Latex formula="p"></Latex> and <Latex formula="q"></Latex> are then used to find 
+<Latex formula="n = pq" mode="center"></Latex>
+<Latex formula="d \equiv e^{-1}\quad(\text{mod } \varphi(n))" mode="center"></Latex>
+
+where <Latex formula="\varphi(n) = (p-1)(q-1)"></Latex> and <Latex formula="e = 0\text{x}10001"></Latex>.
+Giving the private key <Latex formula="(n, d)"></Latex> and the public key <Latex formula="(n, e)"></Latex>.
+
+Now we know that the following line of code in `encrypt`
+
+
+```c
+pow_mod(mystery, key, &d, &n);
+```
+which is equivalent to the operation
+
+<Latex formula="\text{mystery} \equiv (\text{key|counter|nonce})^{d}\quad(\text{mod } n)" mode="center"></Latex>
+encrypts the concatenation of key, counter and nonce using the RSA private-key
+<Latex formula="(n, d)"></Latex>. Due to the properties of RSA, the original ChaCha20 key, counter and nonce can
+then be recovered from `mystery` by calculating
+
+<Latex formula="\text{key|counter|nonce} \equiv (\text{mystery})^{e}\quad(\text{mod } n)" mode="center"></Latex>
+
+The function `encrypt` appends the values of <Latex formula="n"></Latex> and 
+`mystery` as a hex string to the decrypted file data.
+Additionally the value of the exponent <Latex formula="e"></Latex> is known to be 0x10001. 
+Therefore we have all the necessary information to recover the ChaCha20 key, counter
+and nonce that were used to encrypt the file data. This allows us to 
+finally decrypt the Chacha20-encrypted data.
+
+## Putting it all together
+
+With all the above information in hand, it is now possible to 
+decrypt the contents of `SuspiciousFile.txt.Encrypted` through the following 
+steps:
+
+- find the values of <Latex formula="n"></Latex> and `mystery` located after the encrypted data in `SuspiciousFile.txt.Encrypted`
+- perform the computation of  <Latex formula="\text{mystery}^{e}(\text{mod } n)"></Latex> to recover the key|counter|nonce
+- decrypt the file data using ChaCha20-Encryption with the recovered key, counter and nonce
+
+For this I wrote the following python script:
+
+```python
+from Crypto.Cipher import ChaCha20
+
+# open the suspicious text file and read in its contents
+with open("SuspiciousFile.txt.Encrypted", "rb") as thing:
+    thing = bytearray(thing.read())
+
+# define helper function that splits the indexable object `it` at index `idx`
+split = lambda it, idx : (it[:idx], it[idx:])
+
+# parse the data from the back to front 
+
+# find the encrypted key that was used for the ChaCha20 encryption
+assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
+thing, encrypted_key = split(thing, -256)
+
+assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
+thing, _ = split(thing, -256)
+
+# find the rsa-parameter n
+assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
+thing, n = split(thing, -256)
+
+assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
+encrypted_data, _ = split(thing, -256)
+
+# rsa-decrypt the key, nonce and counter to-be-used for the ChaCha20 computations 
+n = int(n.decode("utf-8"), 16)
+encrypted_key = int(encrypted_key.decode("utf-8"), 16)
+decrypted_key = pow(encrypted_key, 0x10001, mod=n)
+decrypted_key_bytes = decrypted_key.to_bytes(0x30, "little")
+
+# extract the key and the nonce from (key | counter | nonce)
+# counter is hardcoded to zero in flareon.exe, so it is not extracted
+key = decrypted_key_bytes[:0x20]
+nonce = decrypted_key_bytes[0x24:]
+
+# decrypt the file content and output it to stdout
+output = bytes()
+cipher = ChaCha20.new(key=key, nonce=nonce)
+for i in range(0, len(encrypted_data), 0x40):
+    chunk = encrypted_data[i:i + 0x40]
+    output += cipher.decrypt(chunk)
+
+print(output.decode("utf-8"))
+```
+Executing this script gives:
+
+```
+Hello!
+
+The flag is:
+
+R$A_$16n1n6_15_0pp0$17e_0f_3ncryp710n@flare-on.com
+```

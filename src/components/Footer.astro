@@ -1,0 +1,30 @@
+---
+const today = new Date();
+const {link, alt} = Astro.props;
+---
+
+<footer>
+	<div class="left">
+	{
+		link && alt && (<a href={link}>{alt}</a>)
+	}
+	</div>
+	<div class="center">
+		&copy; {today.getFullYear()} lkron. All rights reserved.
+	</div>
+	<div class="left">
+
+	</div>
+</footer>
+<style>
+	footer {
+		display: flex;
+	}
+	.center {
+		flex: 1;
+		text-align: center;
+	}
+	.left {
+		flex: 1;
+	}
+</style>

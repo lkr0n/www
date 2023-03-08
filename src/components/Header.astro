@@ -1,0 +1,46 @@
+---
+import HeaderLink from './HeaderLink.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<header>
+	<div>
+	<h2>
+		{SITE_TITLE}
+	</h2>
+	<nav>
+		<HeaderLink href="/">Home</HeaderLink>
+		<HeaderLink href="/blog">Blog</HeaderLink>
+		<HeaderLink href="https://twitter.com/LouisKronberg" target="_blank">Twitter</HeaderLink>
+		<HeaderLink href="https://github.com/lkr0n" target="_blank">GitHub</HeaderLink>
+	</nav>
+	</div>
+<div >
+	<img src="/logo.png"/>
+</div>
+</header>
+<style>
+
+	header {
+		display: flex;
+		position: relative;
+		margin-bottom: 2em;
+	}
+	h2 {
+		margin: 0.5em 0;
+	}
+	nav {
+	}
+	.logo {
+		margin: 0px;
+	}
+	img {
+		margin: auto;
+		position: absolute;
+		right: 0px;
+		top: 50%;
+		bottom: 50%;
+		height: 100%;
+	}
+
+</style>

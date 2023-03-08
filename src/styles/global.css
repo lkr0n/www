@@ -1,0 +1,104 @@
+
+html {
+    font-family: sans-serif;
+    font-size: 1rem;
+    word-break: break-word;
+}
+
+@media (min-width: 900px) {
+    html {
+        background-color: rgb(240, 240, 240);
+    }
+	body {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 900px;
+		max-width: 900px;
+        padding: 15px;
+        background-color: white;
+        box-shadow:0 0 5px 0px #000000;
+        border: solid 1px grey
+	}
+
+}
+
+@media (max-width: 900px) {
+	body {
+		width: 100%;
+		max-width: 100%;
+		margin: auto;
+		padding: 5px;
+		box-sizing: border-box;
+        background-color: white;
+        font-size: 0.85rem;
+	}
+}
+
+header {
+    padding: 5px;
+    border: 1px solid grey;
+    background-color: rgb(250, 250, 250);
+}
+
+footer {
+	padding: 2px;
+	box-sizing: border-box;
+    border-top: 1px solid;
+	margin: 0em;
+	margin-top: 1rem;
+	width: 100%;
+}
+
+
+nav a {
+	margin-right: 10px;
+}
+
+
+table {
+	width: 100%;
+    border-collapse: collapse;
+    border-bottom: solid 1px;
+}
+
+th {
+    border: solid 1px;
+}
+
+td { 
+    border: solid 1px;
+    border-width: 0 1px;
+    padding-left: 5px;
+}
+
+pre {
+    margin: 0;
+}
+
+
+code {
+    font-size: 0.8rem;
+}
+
+.astro-code {
+    padding: 5px;
+    font-family: monospace;
+	max-width: 100%;
+	font-size: 0.8rem;
+    border: solid 1px #cfcfcf;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    margin:auto;
+    height:auto;
+}
+
+.katex-display {
+    overflow: auto;
+    height: 100%;
+}
+

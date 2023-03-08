@@ -1,0 +1,14 @@
+---
+import 'katex/dist/katex.min.css';
+import katex from 'katex';
+export interface Props {
+  formula: string;
+  mode?: "center";
+}
+
+const { formula, mode } = Astro.props;
+const html = katex.renderToString(formula, {
+  displayMode: mode == "center"
+});
+---
+<span set:html={html}></span>

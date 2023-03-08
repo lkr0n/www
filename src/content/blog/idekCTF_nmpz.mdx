@@ -1,0 +1,265 @@
+---
+title: "idekCTF 2022 - NMPZ Challenge"
+description: "Write up of the 'NMPZ' Challenge from idekCTF 2022"
+pubDate: "January 16 2023"
+---
+
+ This Weekend I participated in the [idekCTF](https://web.archive.org/web/20230110213400/https://ctf.idek.team/). One of the OSINT challenges I worked on was called NMPZ and revolved around essentially playing a more involved game of [Geoguessr](https://web.archive.org/web/20230307103924/https://www.geoguessr.com/). The challenge consists of 17 different images of google street view panoramas, to which one has to figure out the countries the respective images were taken in. Once all the countries have been succesfully identified, the flag is composed according to the following rules:
+
+- The first letter of every country's name will create the flag.
+- Countries with over 10 million inhabitants will have a capital letter.
+- Countries with less than one million inhabitants become an underscore. 
+
+Example: `idek{TEST_flAg}` can be composed from the following countries:
+
+|Picture| Country   	    |Letter |
+|-------|-------------------|-------|
+| 1.png | 	Turkey 	        | T     |
+| 2.png | 	Ecuador 	    | E     |
+| 3.png | 	Spain 	        | S     |
+| 4.png | 	Thailand 	    | T     |
+| 5.png | 	Vatican City    | _     |
+| 6.png | 	Finland 	    | f     |
+| 7.png | 	Lithuania 	    | l     |
+| 8.png | 	Argentina 	    | A     |
+| 9.png | 	Georgia 	    | g     |
+
+I am certainly no [rainbolt](https://web.archive.org/web/20230121205141/https://twitter.com/georainbolt), so naturally I turned to the best geoguessr player I know personally: my [brother](https://twitter.com/matthewde_). And so, we teamed up to beat this challenge! 
+
+## Let's play some Geoguessr!
+
+We'll go through the pictures roughly in the order we have solved them. 
+
+### 1.png
+
+![google street view panomara of a harbor, blue sky, distant mountains with green vegetation](/geo/1.webp)
+
+This one looked very unassuming at first sight. But a closer look at one of the mountain peeks in the picture reveals:
+
+![vaguely cross shaped silhoutte on top of a moutain, shrouded in clouds](/geo/1zoomed.webp)
+
+This made me immediately think of the Jesus Statue in Rio De Janeiro in "Epic T-Pose Man Country" aka. Brazil. Going on google streetview in Rio De Janeiro produces close enough results for me to consider this a case closed. This image must have been taken in Rio De Janeiro. The first country is Brazil.
+
+### 2.png
+
+![google street view panorama of a public square paved with black bricks, buildings with red bricks and domes](/geo/2.webp)
+
+The clearly visible cyrillic script, as well as the iconic architecture of the Saint Basil's Cathedral identifies this as Moscow, Russia. 
+
+### 3.png
+
+![google street view panorama, blue sky, bigger public square, partially fenced off, stairs in the background](/geo/3.webp)
+
+Another very unassuming picture but the following steetsign is readable when zoomed in
+
+![Street sign reading "Kalamaja"](/geo/3zoomed.webp)
+
+Googling for "Kalamaja" yields results for a district in Talinn, Estonia. Exploring in google maps' satelite view on the lookout for the structure in the background gives the precise [location](https://www.google.com/maps/@59.4437727,24.7542789,3a,75y,353.02h,77.93t/data=!3m6!1e1!3m4!1s67Hb3Km1t8-HDFIdQq9kRA!2e0!7i13312!8i6656).
+
+### 6.png
+
+![google street view panorama of a street running through plains, thin yellow bollards on both roadsides, mountains in the distance](/geo/6.webp)
+
+This one must be iceland because of the yellow bollards and the surrounding nature. 
+
+### 9.png
+
+![google street view panorama of a skyline viewed from the see, mountains in the background](/geo/9.webp)
+
+My brother said that the vegetation in the picture would give off "south european vibes". A quick google reverse image search confirms his hunch. The picture was taken in Monaco. We found pretty much the exact [location](https://www.google.com/maps/@43.7370613,7.4319619,2a,75y,304.38h,89.56t/data=!3m6!1e1!3m4!1shuYc2c3kcn5J3Vf8HcQemQ!2e0!7i13312!8i6656). 
+
+### 10.png
+
+![google street view panorama of countryside houses, mountains in the background](/geo/10.webp)
+
+Computer, Enhance! 
+
+![swuisse flag](/geo/10zoomed.webp)
+
+Clearly that is a suisse flag. The country must be Switzerland then! 
+
+
+### 11.png
+
+![google street view panorma of countryside, no mountains, white bollards with a single red stripe on the roadside](/geo/11.webp)
+
+Here the bollards give it away. 
+
+![Zoom-in on one of the white bollards with a single red diagonal stripe](/geo/11zoomed.webp)
+
+The red diagonal stripe is unique to poland. 
+
+### 12.png
+
+![google street view of city](/geo/12.webp)
+
+In the Picture a streetsign is visible: 
+
+![google street view of city](/geo/12zoomed.webp)
+
+
+It is hard to make out but it reads: "Nikolaus-Dumba-Strasse". Googling for it gives a [location](https://www.google.com/maps/@47.5682565,14.2399853,3a,75y,188.39h,81.54t/data=!3m6!1e1!3m4!1sm_fK66gUz10cHDKCEpM2ew!2e0!7i16384!8i8192) in Austria.
+
+## Mostly Guesswork
+
+
+Let's review some of our current progress in figuring out the flag:
+
+|Picture 	    | Country   | Letter    |
+|---------------|-----------|-----------|
+|[1.png](#1png) | Brazil 	| B         |
+|[2.png](#2png) | Russia 	| R         |
+|[3.png](#3png) | Estonia 	| e         |
+|[4.png](#4png) | ??? 	    | ?         |
+|[5.png](#5png) | ??? 	    | ?         |
+|[6.png](#6png) | Iceland 	| _         |
+
+
+ Now operating under the assumption the challenge author is not cruel and the flag actually spells out a sensible english phrase, we googled for a list of 5 letter words with prefix "Bre" giving
+
+- bread
+- breed
+- break 
+
+and some more which are not in common use in English.
+
+We couldn't imagine "breed" as the first word in the flag string, so this leaves us with "break" or "bread" which have the letter 'a' in common. The 4th picture: 
+
+![googe street view panorama of savannah like flora, red dirt](/geo/4.webp)
+
+ we could not identify at first but with the information that the country might start with an a, Australia seems like a very plausible choice. Especially because of the soil, my brother tells me. 
+
+### 13.png
+
+![googe street view plains](/geo/13.webp)
+
+Can not say for sure but me and my brother agree: The vibes are USA or Canada.
+
+### 15.png
+
+![google street view panorama of delapidated housing, dirt street, snow](/geo/15.webp)
+
+Snow and dirt that could be Bulgaria or Hungaria. That is what my brother tells me! 
+
+### 8.png
+
+![google street view panorama of green hilly landscape](/geo/8.webp)
+
+ My brother's intuition is that this is Eswatini. 
+
+### 16.png
+
+![google street view panorama of green mountaines landscape, camera artifact i.e. rift is visible](/geo/16.webp)
+
+The rift, visible at the top of the image could be indicative of Albania or Senegal according to this [guide](https://web.archive.org/web/20230226095828/https://somerandomstuff1.wordpress.com/2019/02/08/geoguessr-the-top-tips-tricks-and-techniques/), as well as my brother. 
+
+Let's review our current progress in figuring out the flag: 
+
+|Picture 	                |Country 	        | Letter|
+|---------------------------|-------------------|-------|
+|[1.png ](#1png)	        |Brazil 	        | B     |
+|[2.png ](#2png)	        |Russia 	        | R     |
+|[3.png ](#3png)	        |Estonia 	        | e     |
+|[4.png ](#4png)	        |Australia 	        | A     |
+|[5.png ](#5png)	        |??? 	            | ?     |
+|[6.png ](#6png)	        |Iceland 	        | _     |
+|[7.png ](#7png)	        |??? 	            | ?     |
+|[8.png ](#8png)	        |Eswatini? 	        | ?     |
+|[9.png ](#9png)	        |Monaco 	        | _     |
+|[10.png](#10png) 	        |Suisse 	        | s     |
+|[11.png](#11png) 	        |Poland 	        | P     |
+|[12.png](#12png) 	        |Austria 	        | a     |
+|[13.png](#13png) 	        |Usa/Canada 	    | ?     |
+|[14.png](#14png) 	        |??? 	            | ?     |
+|[15.png](#15png) 	        |Bulgaria/Hungary   | ?     |
+|[16.png](#16png) 	        |Albania/Senegal 	| ?     |
+|[17.png](#17png) 	        |???             	| ?     |
+
+
+ So far we have something along the lines of `B R E a ? _ ? ? _ s P a ?` ...
+
+There are only very few english words with prefix "spau". This makes Canada the obvious choice for 13.png. Now a lot of english words that have the prefix "spac" also have the prefix "space". 
+
+So it is reasonable guess that the country of 14.png: 
+
+### 14.png
+
+![google street view panorama of jungle landscape, yellow signs with black arrow heads](/geo/14.webp)
+
+must start with an e. Possible countries that have Streetview Coverage are then
+
+- Ecuador
+- Egypt
+- Estonia
+- Eswatini 
+
+Out of these [ecuador](https://somerandomstuff1.wordpress.com/2019/02/08/geoguessr-the-top-tips-tricks-and-techniques/#ecuador) is known to have the yellow road signs visible in the picture. So, Ecuador is our pick for 14.png.
+
+At this point we started speculating what the flag could spell out! Remember that up to now we have
+`B R E a ? _ ? ? _ s P a C e` ... This gave us the idea that the flag might be referencing the spacebar, rainbolt litterally is SMACKING and POUNDING when entering his guesses. Not only would this align with the hunches we have for pictures 15 and up but also it would then make so much sense that the first word is 'break'. With this assumption in hand, the fifth picture:
+
+### 5.png
+
+![google street view panorama of bustling city road](/geo/5.webp)
+
+must be taken somewhere in a country starting with K. We spent a long time searching in Kuwait but it ended up being Kenya. My brother even found the [facebook account](https://www.facebook.com/p/eople/Al-Sirad-Plaza/100068945366455/) of the "Al Siraad Plaza" visible in the picture which conviently had the exact location linked. Find the exact streetview [here](https://www.google.com/maps/@-1.2707527,36.8498562,3a,75y,258.64h,75.34t/data=!3m6!1e1!3m4!1sgEc2hyrMILhoL8a9rsXT7w!2e0!7i16384!8i8192).
+
+ ### 17.png
+
+Under the assumption that the last word in the flag spells spacebar, the last country for picture 17.png must start with 'R'. 
+
+![google street view panorama of green scrubs and delapidated wood shags](/geo/17.webp)
+
+ Possible countries that have [Streetview Coverage](https://en.wikipedia.org/wiki/Coverage_of_Google_Street_View#Official_coverage_by_country_%CE%BFr_territory) are then
+
+- Russia
+- Reunion (not really a country)
+- Romania 
+
+Both Russia and Romania have population greater than 10 million, so it is safe to say the the last letter is a capital R.
+
+Let's review our current progress: 
+|Picture 	                |Country 	        | Letter|
+|---------------------------|-------------------|-------|
+|[1.png ](#1png)	        |Brazil 	        | B     |
+|[2.png ](#2png)	        |Russia 	        | R     |
+|[3.png ](#3png)	        |Estonia 	        | e     |
+|[4.png ](#4png)	        |Australia 	        | A     |
+|[5.png ](#5png)	        |Kenya 	            | K     |
+|[6.png ](#6png)	        |Iceland 	        | _     |
+|[7.png ](#7png)	        |??? 	            | ?     |
+|[8.png ](#8png)	        |Eswatini? 	        | ?     |
+|[9.png ](#9png)	        |Monaco 	        | _     |
+|[10.png](#10png) 	        |Suisse 	        | s     |
+|[11.png](#11png) 	        |Poland 	        | P     |
+|[12.png](#12png) 	        |Austria 	        | a     |
+|[13.png](#13png) 	        |Canada      	    | C     |
+|[14.png](#14png) 	        |Ecuador 	        | E     |
+|[15.png](#15png) 	        |Bulgaria           | b     |
+|[16.png](#16png) 	        |Albania            | a     |
+|[17.png](#17png) 	        |Romania/Russia     | R     |
+
+All that is left is to figure out are 7.png and 8.png forming the two-letter word in the middle. This took by far the longest time! We thought 
+
+### 7.png
+
+![googles street view panorama of big city, dirt ground, blue sky](/geo/7.webp)
+
+would be somewhere in South America. As there are not many sensible two-letter words in the english language, we resorted to submitting possible combinations to the ctf-platform that make sense in the context of the pictures.
+
+We suspected Mexico for 7.png for the longest time because with it you could form the words "my" or "me". However submitting any of the following gave an incorrect flag:
+
+- `idek{BReAK_Me_sPaCEbaR}`
+- `idek{BReAK_My_sPaCEbaR}` 
+
+After long, my brother finally had the idea that 7.png could be Mongolia! After all, crossreferencing the visible license plate in the picture with ones commonly found in Mongolia checks out. And sure enough the following is accepted by the challenge platform:
+
+```
+idek{BReAK_me_sPaCEbaR}
+```
+
+This implies that the country for picture [8.png](#8png) must start with an 'e'. Turns out my brother's initial hunch for 8.png was correct. It was Eswatini!
+
+## Closing Words
+
+Thanks for reading this far. Overall, this was a very fun challenge. On top of learning new geoguessr strats, I also spent some quality time with my brother. Thank you, Challenge Author! 

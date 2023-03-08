@@ -1,0 +1,154 @@
+---
+title: "FlareOn 9 - Challenge 9 Writeup"
+description: "Write up of the 'Nur getraeumt' Challenge"
+pubDate: "November 19 2022"
+---
+
+## Challenge Statement and Files
+
+Challenge Name: Nur geträumt
+Challenge Files:
+- README.TXT
+- Nur geträumt.img
+
+Abbreviated Challenge Statement, taken from README.TXT:
+
+```
+This challenge is a Macintosh disk image (Disk Copy 4.2 format, for those who need to
+know) containing a 68K Macintosh program.  You must determine the passphrase used to
+decode the flag contained within the application. 
+
+Happy solving!  Be curious!
+```
+## Getting the disk image to load in an emulator
+
+I used the [Mini vMac](https://www.gryphel.com/c/minivmac/)
+as an emulator.  Starting up Mini vMac, gives the following:
+
+![Textbox reading: I can not find the ROM image file vMac.ROM](/flareon10/Screenshot_20221116_062022.png)
+
+As you can see a vMac.ROM file is necessary to emulate anything.
+In order to load the "Nur geträumt.img" disk, we need to first provide vMac.ROM which can be found some place online.
+Dragging the "Nur geträumt.img" into the window of Mini vMac gives the following prompt to insert a floppy:
+
+![Floppy disk with a questionmark on grey background](/flareon10/Screenshot_20221116_062153.png)
+
+The vMac.ROM is prompting the User to insert a floppy
+
+Trying to drag and drop the "Nur geträumt.img" into the emulator gives: 
+![Textbox reading: Open Failed](/flareon10/Screenshot_20221116_062153.png)
+
+I had the suspicion that to load the disk, an operating system was required.
+So I set out and downloaded 
+[MacOS System 7.0.1](https://archive.org/details/mac_MacOS_7.0.1_compilation), a "graphical user interface-based operating system for Macintosh computers".
+
+Draggin the system 7.0.1 rom into the emulator gives 
+
+![Standard Macintosh 7.0.1 User Interface](/flareon10/Screenshot_20221116_062735.png)
+
+Finally, a usable GUI! Let's load "Nur geträumt.img"
+
+![Textbox reading: Open Failed, Failure to load "Nur geträumt.img"](/flareon10/Screenshot_20221116_062802.png)
+
+Oh no! It still does not work. The culprit here is the filename containing 
+the umlaut ä. After renaming the "Nur geträumt.img" to not contain an umlaut, the disk loads fine:
+
+![Macintosh Desktop showing the loaded disk](/flareon10/Screenshot_20221116_062820.png)
+
+Nur geträumt.img shows up on the desktop! 
+The disk contains the executable "Nur geträumt.exe" which prompts for a password
+and outputs a flag value computed from the password.
+
+![password prompt with sample input](/flareon10/Screenshot_20221116_062925.png)
+
+## Extracting the challenge executable from the disk image
+
+In order to find the password, I set out to get my hands on the binary
+"Nur geträumt.exe" contained inside the "Nur geträumt.img" disk image.
+The disk image format is Apple DiskCopy 4.2.
+Find more information on the file format 
+[here](https://www.discferret.com/wiki/Apple_DiskCopy_4.2).
+
+The format is really simple. The raw data starts at byte offset 0x54.
+With this information, I used the following commands in WSL to extract the raw data of 
+the disk image 
+
+```
+$ mv 'Nur geträumt.img' thing.img
+$ dd skip=84 bs=1 if=thing.img of=thing.bin
+1474560+0 records in
+1474560+0 records out
+1474560 bytes (1.5 MB, 1.4 MiB) copied, 0.966041 s, 1.5 MB/s
+$ file thing.bin
+thing.hfs: Macintosh HFS data (mounted) block size: 512, number of blocks: 2874, volume name: Nur getr\\212umt
+```
+
+As you can see the raw data is a HFS (Hierarchical File System).
+I then used 
+[HFSExplorer](https://www.catacombae.org/hfsexplorer/)
+to inspect the filesystem more closely.
+
+![Screenshot of HFSExplorer showing thing.hfs](/flareon10/Screenshot_20221116_083042.png)
+
+The hfs in HFSExplorer with the desired executable highlighted.As you can see the filesize of the binary is zero. This stumped me at first 
+but is a consequence of the hfs file format. In the hfs file format, the 
+bytes making up a file are actually spread between two "forks", the data fork
+and the resource fork. The file size shown in the screen shot above shows
+the size of the data fork. The actual content of this file is in the resource
+fork. Extracting the resource fork to the windows filesystem is easily done with 
+HFSExplorer:
+
+![Screenshot of HFSExplorer, about to extract the binary](/flareon10/Screenshot_20221116_083125.png)
+
+Extended Attributes refers to the resource fork
+
+## Solving the Challenge
+With the binary extracted, I first looked at the strings contained in the 
+binary. These are strings of interest:
+
+```
+Have fun, and enjoy the challenge! If you're still having
+trouble, maybe try asking the program if it has a bit of time for you; perhaps
+it will sing you a song. 
+```
+and
+```
+99 Luftballons
+```
+
+The strings reference the 1983 hitsong "99 Luftballons" by Nena as well 
+as hinting that the program might sing a song for us, if asked nicely.
+
+Specifically, the hint references the following lyrics of "99 Luftballons":
+
+```
+Hast du etwas Zeit für mich
+Dann singe ich ein Lied für dich
+```
+which translates to
+
+```
+Do you have some time for me
+Then I'll sing a song for you
+```
+
+well let's try to enter a variation of "Hast du etwas Zeit fur mich"
+into the password prompt:
+
+![The password prompt showing a string ending in flare-on.com](/flareon10/Screenshot_20221116_080119.png)
+
+Not quite the flag yet, but getting there.As you can see the flag becomes already recognizable, it is the second line of the 
+above song lyric with the usual suffix. 
+
+To be 100% sure that I got the right flag, I downloaded a 
+[german Version](http://www.knubbelmac.de/themen/system-7/)
+of the operating system which allows me to enter the ü in "Hast du etwas Zeit für mich?"
+
+![Password prompt showing flag](/flareon10/Screenshot_20221116_091905.png)
+
+Note the umlaut in the password promptPressing try, confirms this input as the correct password:
+
+![Password prompt showing flag](/flareon10/Screenshot_20221116_091934.png)
+
+The password is correct! This was a really fun challenge and I learned a lot about retro computing and 
+old MacIntosh. Thanks to the challenge author!
