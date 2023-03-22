@@ -1,0 +1,17 @@
+---
+import { readFileSync } from  "fs";
+import hljs from 'highlight.js';
+import path from 'path';
+
+const { lang, filename } = Astro.props;
+const link = path.join("/", filename);
+const filepath = path.join("public", filename);
+const text = readFileSync(filepath, "utf-8");
+let { value, language } = hljs.highlight(text, {language: lang || "plaintext"});
+language = "language-".concat(language || "plaintext")
+---
+<span class="box">File: <a href={link}>{path.posix.basename(filepath)}</a></span>
+<pre>
+<code class={language} set:html={value}>
+</code>
+</pre>

@@ -75,19 +75,21 @@ td {
 
 pre {
     margin: 0;
-}
-
-
-code {
+    background:rgb(250, 250, 250);
+    border: solid 1px black;
+    padding: 5px;
     font-size: 0.8rem;
 }
 
-.astro-code {
+.box {
+    border: solid 1px black;
+    border-bottom: none;
+    display: block;
     padding: 5px;
-    font-family: monospace;
-	max-width: 100%;
-	font-size: 0.8rem;
-    border: solid 1px #000000;
+}
+
+code {
+    font-size: 0.8rem;
 }
 
 img {
