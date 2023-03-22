@@ -7,12 +7,7 @@ export function remarkHighlight() {
 	return function (tree: any) {
 		const visitor = (node: any) => {
 			node.type = 'html';
-
-			if (node.lang === null) {
-				node.lang = "plaintext"
-			}
-			
-			let { value, language } = hljs.highlight(node.value, {language: node.lang});
+			let { value, language } = hljs.highlight(node.value, {language: node.lang || "plaintext"});
 			node.value = `<pre><code class=language-"${language}">${value}</code></pre>`;
 			return node;
 		};

@@ -76,6 +76,7 @@ td {
 pre {
     margin: 0;
     background:rgb(250, 250, 250);
+    overflow: scroll;
     border: solid 1px black;
     padding: 5px;
     font-size: 0.8rem;
@@ -103,4 +104,3 @@ img {
     overflow: auto;
     height: 100%;
 }
-
