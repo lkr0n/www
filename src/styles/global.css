@@ -60,24 +60,25 @@ nav a {
 table {
 	width: 100%;
     border-collapse: collapse;
-    border-bottom: solid 1px;
+    border: solid 1px grey;
+    background:rgb(245, 245, 245);
 }
 
 th {
-    border: solid 1px;
+    border: solid 1px grey;
 }
 
 td { 
-    border: solid 1px;
+    border: solid 1px grey;
     border-width: 0 1px;
     padding-left: 5px;
 }
 
 pre {
     margin: 0;
-    background:rgb(250, 250, 250);
+    background:rgb(245, 245, 245);
     overflow: scroll;
-    border: solid 1px black;
+    border: solid 1px grey;
     padding: 5px;
     font-size: 0.8rem;
 }
