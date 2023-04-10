@@ -12,5 +12,6 @@ export async function get(context) {
 			...post.data,
 			link: `/blog/${post.slug}/`,
 		})),
+		stylesheet: "/rss/pretty-feed-v3.xsl",
 	});
 }
