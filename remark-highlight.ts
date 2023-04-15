@@ -1,5 +1,4 @@
 import { visit } from 'unist-util-visit';
-const noVisit = new Set(['root', 'html', 'text']);
 import hljs from 'highlight.js';
 
 
