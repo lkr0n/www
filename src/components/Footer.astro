@@ -1,8 +1,11 @@
 ---
+import HeaderLink from './HeaderLink.astro';
+
 const today = new Date();
 const {link, alt} = Astro.props;
 ---
 
+<hr>
 <footer>
 	<div class="left">
 	{
@@ -10,7 +13,7 @@ const {link, alt} = Astro.props;
 	}
 	</div>
 	<div class="center">
-		&copy; {today.getFullYear()} lkron. All rights reserved.
+		&copy; {today.getFullYear()} Louis Kronberg
 	</div>
 	<div class="left">
 
@@ -19,6 +22,7 @@ const {link, alt} = Astro.props;
 <style>
 	footer {
 		display: flex;
+		margin: 0;
 	}
 	.center {
 		flex: 1;
@@ -26,5 +30,20 @@ const {link, alt} = Astro.props;
 	}
 	.left {
 		flex: 1;
+	}
+	a {
+		display: inline-block;
+		text-decoration: none;
+		color: black;
+		padding: 4px;
+	}
+	a.active {
+		color: black;
+		font-weight: bolder;
+		text-decoration: underline;
+	}
+	a:hover {
+		color: white;
+		background-color: black;
 	}
 </style>
