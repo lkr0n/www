@@ -6,9 +6,22 @@ export interface Props {
   mode?: "center";
 }
 
+function render(formula: string, mode: boolean): string  {
+  try {
+    return katex.renderToString(formula, {
+      displayMode: mode
+    });
+  }catch(e) {
+    if (e instanceof Error) {
+      return e.message
+    }else {
+      console.log(e)
+      return "FAILED TO RENDER LATEX. FOR BACKTRACE CHECK CONSOLE"
+    }
+  }
+}
+
 const { formula, mode } = Astro.props;
-const html = katex.renderToString(formula, {
-  displayMode: mode == "center"
-});
+const html = render(formula, mode == "center");
 ---
 <span set:html={html}></span>
