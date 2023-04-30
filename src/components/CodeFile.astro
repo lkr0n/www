@@ -2,6 +2,7 @@
 import { readFileSync } from  "fs";
 import hljs from 'highlight.js';
 import path from 'path';
+import 'highlight.js/styles/github.css';
 
 const { lang, filename } = Astro.props;
 const link = path.join("/", filename);
