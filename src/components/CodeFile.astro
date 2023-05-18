@@ -13,6 +13,10 @@ language = "language-".concat(language || "plaintext")
 ---
 <span class="box">File: <a href={link}>{path.posix.basename(filepath)}</a></span>
 <pre>
-<code class={language} set:html={value}>
-</code>
+<code class={language} set:html={value}></code>
 </pre>
+<style>
+.box {
+    box-shadow:0 0 5px 0px #000000;
+}
+</style>

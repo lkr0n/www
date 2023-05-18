@@ -84,6 +84,7 @@ pre {
     background: var(--bg-color);
     margin:0;
     overflow-x: auto;
+    box-shadow:0 0 5px 0px #000000;
     border: var(--border);
     padding: 5px;
     font-size: 0.8rem;
