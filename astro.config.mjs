@@ -1,6 +1,9 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import { remarkHighlight } from './remark-highlight.ts';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkRehype from 'remark-rehype';
 
 import sitemap from '@astrojs/sitemap';
 
@@ -10,6 +13,6 @@ export default defineConfig({
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		syntaxHighlight: false,
-		remarkPlugins: [remarkHighlight],
+		remarkPlugins: [remarkHighlight, remarkMath, remarkRehype, rehypeKatex],
 	}
 });

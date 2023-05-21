@@ -4,8 +4,9 @@ description: "Write up of the 'Encryptor' Challenge"
 pubDate: "November 15 2022"
 ---
 
-import Latex from '../../components/Latex.astro'
 import CodeFile from '../../components/CodeFile.astro'
+import 'katex/dist/katex.min.css';
+
 
 # Challenge Setup
 
@@ -76,17 +77,18 @@ file to the output file.
 Then, the `encrypt` function also writes the values of the variables
 
 - part1
-- <Latex formula='n'></Latex>
+- $n$
 - part3
-- <Latex formula='\text{mystery}  \equiv (\text{key|counter|nonce})^{d}\quad{}(\text{mod } n)'></Latex>
+- $\text{mystery}  \equiv (\text{key|counter|nonce})^{d}\quad{}(\text{mod } n)$
 
 as hexstrings seperated by newlines to the output file. (The | here denotes concatenation)
 
 The variables
 - part1
-- <Latex formula='n'></Latex>
+- $n$
 - part3
-- <Latex formula='d'></Latex>
+- $d$
+
 are globals, which are set at the start of the program.
 A subset of these is also written to the How-to-File.
 The values will play an 
@@ -192,19 +194,19 @@ recover the key?
 To recap: To the encrypted data, following values are appended
 
 - part1
-- <Latex formula='n'></Latex>
+- $n$
 - part3
-- <Latex formula='\text{mystery}  \equiv (\text{key|counter|nonce})^{d}\quad{}(\text{mod } n)'></Latex>
+- $\text{mystery}  \equiv (\text{key|counter|nonce})^{d}\quad{}(\text{mod } n)$
 
 We'll be focusing exclusively on:
 
-- <Latex formula='n'></Latex>
-- <Latex formula='d'></Latex>
+- $n$
+- $d$
 - mystery
 
 as that is all what is needed for solving the challenge.
 
-The values of <Latex formula='n'></Latex> and <Latex formula='d'></Latex>
+The values of $n$ and $d$
 are computed once at the very start of the progam in a function I called
 `init`. Again I have already labeled all of the functions and variables 
 from the ghidra decompilation output.
@@ -250,19 +252,24 @@ void init(void) {
 ```
 
 The `init` function generates the private
-[RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem))-key <Latex formula='(n,d)'></Latex>
+[RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem))-key $(n,d)$
 
-It does so by randomly generating random numbers \(p\) and \(q\) so long until
+It does so by randomly generating random numbers $p$ and $q$ so long until
 both of them pass a primality test. I did not fully reverse the primality 
 test but I have a strong suspicion that it is 
 [Miller-Rabin](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test)
 
-The (probable-) primes <Latex formula="p"></Latex> and <Latex formula="q"></Latex> are then used to find 
-<Latex formula="n = pq" mode="center"></Latex>
-<Latex formula="d \equiv e^{-1}\quad(\text{mod } \varphi(n))" mode="center"></Latex>
+The (probable-) primes $p$  and $q$ are then used to find 
+$$
+n = pq
+$$
 
-where <Latex formula="\varphi(n) = (p-1)(q-1)"></Latex> and <Latex formula="e = 0\text{x}10001"></Latex>.
-Giving the private key <Latex formula="(n, d)"></Latex> and the public key <Latex formula="(n, e)"></Latex>.
+$$d
+d \equiv e^{-1}\quad(\text{mod } \varphi(n))
+$$
+
+where $\varphi(n) = (p-1)(q-1)$ and $e = 0\text{x}10001$
+Giving the private key $(n, d)$ and the public key $(n, e)$.
 
 Now we know that the following line of code in `encrypt`
 
@@ -272,16 +279,20 @@ pow_mod(mystery, key, &d, &n);
 ```
 which is equivalent to the operation
 
-<Latex formula="\text{mystery} \equiv (\text{key|counter|nonce})^{d}\quad(\text{mod } n)" mode="center"></Latex>
+$$
+\text{mystery} \equiv (\text{key|counter|nonce})^{d}\quad(\text{mod } n)
+$$
 encrypts the concatenation of key, counter and nonce using the RSA private-key
-<Latex formula="(n, d)"></Latex>. Due to the properties of RSA, the original ChaCha20 key, counter and nonce can
+$(n, d)$. Due to the properties of RSA, the original ChaCha20 key, counter and nonce can
 then be recovered from `mystery` by calculating
 
-<Latex formula="\text{key|counter|nonce} \equiv (\text{mystery})^{e}\quad(\text{mod } n)" mode="center"></Latex>
+$$
+\text{key|counter|nonce} \equiv (\text{mystery})^{e}\quad(\text{mod } n)
+$$
 
-The function `encrypt` appends the values of <Latex formula="n"></Latex> and 
+The function `encrypt` appends the values of $n$ and 
 `mystery` as a hex string to the decrypted file data.
-Additionally the value of the exponent <Latex formula="e"></Latex> is known to be 0x10001. 
+Additionally the value of the exponent $e$ is known to be 0x10001. 
 Therefore we have all the necessary information to recover the ChaCha20 key, counter
 and nonce that were used to encrypt the file data. This allows us to 
 finally decrypt the Chacha20-encrypted data.
@@ -292,8 +303,8 @@ With all the above information in hand, it is now possible to
 decrypt the contents of `SuspiciousFile.txt.Encrypted` through the following 
 steps:
 
-- find the values of <Latex formula="n"></Latex> and `mystery` located after the encrypted data in `SuspiciousFile.txt.Encrypted`
-- perform the computation of  <Latex formula="\text{mystery}^{e}(\text{mod } n)"></Latex> to recover the key|counter|nonce
+- find the values of $n$ and `mystery` located after the encrypted data in `SuspiciousFile.txt.Encrypted`
+- perform the computation of  $\text{mystery}^{e}(\text{mod } n)$ to recover the key|counter|nonce
 - decrypt the file data using ChaCha20-Encryption with the recovered key, counter and nonce
 
 For this I wrote the following python script:

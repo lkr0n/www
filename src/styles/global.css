@@ -97,6 +97,12 @@ pre {
     padding: 5px;
 }
 
+blockquote {
+    border-left: solid 1px black;
+    padding-left: 5px;
+    color: grey;
+}
+
 code {
     font-size: 0.8rem;
 }

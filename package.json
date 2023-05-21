@@ -16,6 +16,9 @@
     "@types/katex": "^0.16.0",
     "astro": "^2.0.17",
     "highlight.js": "^11.7.0",
-    "katex": "^0.16.4"
+    "katex": "^0.16.4",
+    "rehype-katex": "^6.0.3",
+    "remark-math": "^5.1.1",
+    "remark-rehype": "^10.1.0"
   }
 }
