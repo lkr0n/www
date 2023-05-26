@@ -36,9 +36,9 @@ First I sampled the elusive polynomial at point `x = 0x80`.
 Writing the resulting sampled point as a base-128 number gives the coefficients of the polynomial as base-128 digits.
 Note that this only works for this challenge because:
 
-```katex
+$
 128^{18} =  2^{126} < 2^{127} - 1
-```
+$
 This has the consequences that none of the operations in evaluating the polynomial at `x = 0x80` will wrap.
 Thus ensuring that the base-128 digits of the sample will actually be the coefficients of the polynomial.   
 
