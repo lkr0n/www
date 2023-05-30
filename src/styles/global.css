@@ -7,7 +7,6 @@ html {
 :root {
     --bg-color: rgb(255, 255, 255);
     --frame-width: 900px;
-    --inset: 0 0 2px 0px black inset;
     --border: 1px solid black;
 }
 
@@ -24,7 +23,7 @@ html {
         max-width: var(--frame-width);
         padding: 15px;
         background-color: white;
-        box-shadow:0 0 5px 0px #000000;
+        box-shadow:0 0 3px 0px #000000;
         border: solid 1px black;
 }
 
@@ -84,7 +83,7 @@ pre {
     background: var(--bg-color);
     margin:0;
     overflow-x: auto;
-    box-shadow:0 0 5px 0px #000000;
+    box-shadow:0 0 1px 0px #000000;
     border: var(--border);
     padding: 5px;
     font-size: 0.8rem;
@@ -98,7 +97,7 @@ pre {
 }
 
 blockquote {
-    border-left: solid 1px black;
+    border-left: solid 1px grey;
     padding-left: 5px;
     color: grey;
 }
