@@ -24,7 +24,7 @@ html {
         padding: 15px;
         background-color: white;
         box-shadow:0 0 3px 0px #000000;
-        border: solid 1px black;
+        border: var(--border);
 }
 
 }
@@ -51,12 +51,6 @@ footer {
     margin-top: 1rem;
     width: 100%;
 }
-
-nav a {
-    padding: 4px;
-    margin-right: 5px;
-}
-
 
 table {
     width: 100%;
