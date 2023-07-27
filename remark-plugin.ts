@@ -1,5 +1,4 @@
-import { visitChildren } from 'unist-util-visit-children';
-import type { Parent, Node } from 'unist'
+import type { Parent, Node, Data } from 'unist'
 import type { Link, Image, Paragraph } from 'mdast'; 
 
 export function remarkImage() {
@@ -33,5 +32,23 @@ export function remarkImage() {
 			}
 
 		}
+	};
+}
+
+import { visit } from 'unist-util-visit';
+import hljs from 'highlight.js';
+
+export function remarkHighlight() {
+	return function (tree: any) {
+		const visitor = (node: any) => {
+			switch (node.lang) {
+				default:
+					node.type = 'html';
+					const { value, language } = hljs.highlight(node.value, {language: node.lang || "plaintext"});
+					node.value = `<pre><code class=language-"${language}">${value}</code></pre>`;
+					return node;
+			}
+		};
+		return visit(tree, 'code', visitor);
 	};
 }

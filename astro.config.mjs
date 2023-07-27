@@ -1,10 +1,9 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
-import { remarkHighlight } from './remark-highlight.ts';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkRehype from 'remark-rehype';
-import { remarkImage } from './remark-image.ts';
+import { remarkImage, remarkHighlight } from './remark-plugin.ts';
 
 import sitemap from '@astrojs/sitemap';
 
