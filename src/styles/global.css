@@ -32,11 +32,12 @@ html {
 @media (max-width: 900px) {
     body {
         width: 100%;
+        width: 100vw;
         max-width: 100%;
         margin-top: 1px;
         margin: auto;
         padding: 15px;
-        box-sizing: border-box;
+        box-sizing: borderNatuer-box;
         background-color: white;
     }
 }

@@ -3,7 +3,7 @@ import hljs from 'highlight.js';
 
 export function remarkHighlight() {
 	return function (tree: any) {
-		const visitor = (node: any) => {
+		const visitor = (node: Node, ancestors: Array<Parent>) => {
 			switch (node.lang) {
 				default:
 					node.type = 'html';
