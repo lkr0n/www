@@ -20,6 +20,7 @@ export function remarkImage() {
 					continue;
 				}
 
+				// create link mdsast-node wrapping the image node
 				let image_node  = child_node as Image;
 				const link_node: Link = {
 					type: 'link',
@@ -27,10 +28,9 @@ export function remarkImage() {
 					url: image_node.url,
 				};
 
-				// finally replace the node
+				// finally replace the image node with the link
 				paragraph_node.children[j] = link_node;
 			}
-
 		}
 	};
 }

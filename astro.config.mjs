@@ -3,6 +3,7 @@ import mdx from '@astrojs/mdx';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkRehype from 'remark-rehype';
+import remarkToc from 'remark-toc';
 import { remarkImage, remarkHighlight } from './remark-plugin.ts';
 
 import sitemap from '@astrojs/sitemap';
@@ -13,6 +14,6 @@ export default defineConfig({
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		syntaxHighlight: false,
-		remarkPlugins: [remarkImage, remarkHighlight, remarkMath, remarkRehype, rehypeKatex],
+		remarkPlugins: [remarkToc, remarkImage, remarkHighlight, remarkMath, remarkRehype, rehypeKatex],
 	}
 });

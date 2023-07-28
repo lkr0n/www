@@ -42,6 +42,10 @@ html {
     }
 }
 
+h2 {
+    font-size: 1.25rem;
+}
+
 header {
     padding: 5px;
     background-color: var(--bg-color);
