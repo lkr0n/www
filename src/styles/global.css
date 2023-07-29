@@ -23,7 +23,7 @@ body {
     border: var(--border);
 }
 
-@media (max-width: var(--frame-width)) {
+@media (max-width: 900px) {
     body {
         box-sizing: border-box;
         width: 100%;
