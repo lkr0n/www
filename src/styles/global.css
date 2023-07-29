@@ -10,35 +10,24 @@ html {
     --border: 1px solid black;
 }
 
-@media (min-width: 900px) {
-    html {
-        background-color: var(--bg-color);
-    }
-    body {
-        margin-top: 1px;
-        margin-bottom: 20px;
-        margin-left: auto;
-        margin-right: auto;
-        width: var(--frame-width);
-        max-width: var(--frame-width);
-        padding: 15px;
-        background-color: white;
-        box-shadow:0 0 3px 0px #000000;
-        border: var(--border);
+body {
+    margin-top: 1px;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    width: var(--frame-width);
+    max-width: var(--frame-width);
+    padding: 15px;
+    background-color: white;
+    box-shadow:0 0 3px 0px #000000;
+    border: var(--border);
 }
 
-}
-
-@media (max-width: 900px) {
+@media (max-width: var(--frame-width)) {
     body {
-        width: 100%;
-        width: 100vw;
-        max-width: 100%;
-        margin-top: 1px;
-        margin: auto;
-        padding: 15px;
         box-sizing: border-box;
-        background-color: white;
+        width: 100%;
+        max-width: 100%;
     }
 }
 
