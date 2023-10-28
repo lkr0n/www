@@ -1,8 +1,9 @@
 ---
-const { date } = Astro.props;
+import "@fontsource/noto-sans-mono"; 
+const { date, mono } = Astro.props;
 ---
 
-<time datetime={date.toISOString()}>
+<time class="fmtdate" datetime={date.toISOString()}>
 	{
 		date.toLocaleDateString('en-us', {
 			year: 'numeric',
@@ -11,3 +12,10 @@ const { date } = Astro.props;
 		})
 	}
 </time>
+{mono &&
+<style>
+.fmtdate {
+	font-family: "Noto Sans Mono";
+}
+</style>
+}
