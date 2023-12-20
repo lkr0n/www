@@ -68,13 +68,18 @@ $ aaaaaa
 ```
 reveals that ever-increasing sequences of 'a' spell out the alphabet in reverse.
 
-
 This transformation holds even across non-alphabetical characters:
 
 ```
 $ aaaa/aaa
 /bin/sh: 1: hgf*dcba: not found
 ```
+See how the `e` got skipped?
+
+So to recap for alphabetical characters the transformation goes as follows:
+
+1. reverse the input
+2. rotate every character in the reversed string by its index in the non-reversed string  
 
 # Problem: Non-alphabetical characters
 Non-alphabetical characters clearly seem to be special cased. 
