@@ -1,0 +1,126 @@
+---
+title: "niteCTF 2023 - German Shell - Writeup"
+description: "Write up of the 'German Shell' Challenge"
+pubDate: "December 20 2023"
+---
+import 'highlight.js/styles/github.css';
+
+# Challenge Setup
+
+- Challenge Name: German Shell
+- Challenge Category: Reverse Engineering
+
+Challenge handout only consisted of a remote endpoint to connect to over netcat
+and the filepath at which the flag is located on the remote server.
+
+The flag is located at `/var/quantumLava/flag.txt`
+
+Once connected to the remote server, you are given a shell for you to execute 
+commands on. But any user input is garbled via some unknown process:
+
+```
+$ This is some text right here
+/bin/sh: 1: frdf/pcabj/jmsg/pwxa/yn/vkiT: not found
+```
+
+Let's reverse it, to get the flag
+
+# Solving the challenge
+
+First thing I did, was to see how the garbleing treats equal prefixes.
+I wanted to answer questions such as:
+- Is the garbling process deterministic?
+- When garbling input do garbled characters depend on previous characters?
+
+With the following test:
+```
+$ This is some text right here
+/bin/sh: 1: frdf/pcabj/jmsg/pwxa/yn/vkiT: not found
+
+$ This is other text
+/bin/sh: 1: knth+dprcw+yn+vkiT: not found
+```
+you can observe:
+- The prefix has disappeared
+- The two garbled outputs have a shared suffix
+
+From this we can conclude that the garbling process first reverses the user input.
+
+Some more experimentation:
+```
+$ a
+/bin/sh: 1: a: not found
+
+$ aa
+/bin/sh: 1: ba: not found
+
+$ aaa
+/bin/sh: 1: cba: not found
+
+$ aaaa
+/bin/sh: 1: dcba: not found
+
+$ aaaaa
+/bin/sh: 1: edcba: not found
+
+$ aaaaaa
+/bin/sh: 1: fedcba: not found
+```
+reveals that ever-increasing sequences of 'a' spell out the alphabet in reverse.
+
+
+This transformation holds even across non-alphabetical characters:
+
+```
+$ aaaa/aaa
+/bin/sh: 1: hgf*dcba: not found
+```
+
+# Problem: Non-alphabetical characters
+Non-alphabetical characters clearly seem to be special cased. 
+Recall:
+```
+$ This is some text right here
+/bin/sh: 1: frdf/pcabj/jmsg/pwxa/yn/vkiT: not found
+
+$ This is other text
+/bin/sh: 1: knth+dprcw+yn+vkiT: not found
+```
+
+Notice that `/` is substiuted with `+` in all cases. 
+Not what you would expect!
+
+After much experimenting I just had to conclude that the non-alphabetic transformation
+was random.
+
+So I chose to ignore them!
+
+# Solution script
+
+My solution script applies the transformation to alphabetic characters and 
+leaves non-alphabetic ones intact.
+
+```python
+symbols = "!\"#$%&'()*+,-./ "
+string = "cat /var/quantumLava/flag.txt"
+garbled = []
+alphabet = "abcdefghijklmnopqrstuvwxyz"
+for i, c in enumerate(reversed(string)):
+
+    if c in symbols:
+        garbled.append(c)
+        continue
+
+    assert c.lower() in alphabet
+
+    idx = (ord(c.lower()) - ord('a'))
+    a = alphabet[idx - i % len(alphabet)]
+    garbled.append(a if c in alphabet else a.upper())
+
+print("".join(garbled))
+```
+
+Then I just went ahead and repeatedly pasted the ouptut of the above script
+into the shell prompt of the remote server until I got lucky and I got the 
+flag: `nite{tr7n517t10n_u51ng_t1m3_n0t_c001_00000yx}`
+
