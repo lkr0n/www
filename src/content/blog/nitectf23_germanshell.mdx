@@ -30,7 +30,7 @@ Let's reverse it, to get the flag
 First thing I did, was to see how the garbleing treats equal prefixes.
 I wanted to answer questions such as:
 - Is the garbling process deterministic?
-- When garbling input do garbled characters depend on previous characters?
+- When garbling the input, do garbled characters depend on previous characters?
 
 With the following test:
 ```
@@ -92,7 +92,7 @@ $ This is other text
 /bin/sh: 1: knth+dprcw+yn+vkiT: not found
 ```
 
-Notice that `/` is substiuted with `+` in all cases. 
+Notice that `/` is substituted with `+` in all cases. 
 Not what you would expect!
 
 After much experimenting I just had to conclude that the non-alphabetic transformation

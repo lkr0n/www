@@ -45,7 +45,7 @@ export function remarkHighlight() {
 				default:
 					node.type = 'html';
 					const { value, language } = hljs.highlight(node.value, {language: node.lang || "plaintext"});
-					node.value = `<pre><code class=language-"${language}">${value}</code></pre>`;
+					node.value = `<pre><code class=language-${language}>${value}</code></pre>`;
 					return node;
 			}
 		};
