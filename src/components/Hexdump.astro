@@ -1,0 +1,44 @@
+---
+import { readFileSync } from  "fs";
+import path from 'path';
+import 'highlight.js/styles/github.css';
+
+interface Props {
+    filename: string;
+}
+
+const { filename } = Astro.props;
+const link = path.join("/", filename);
+const filepath = path.join("public", filename);
+const bytes = readFileSync(filepath);
+
+let i = 0;
+let lines = "";
+for(i = 0; i < bytes.length; i+=16) {
+
+    let j;
+
+    let offset = i.toString(16).padStart(16, '0');
+    let hex = "";
+    let ascii = "";
+
+    for (j = 0; j < 16 && i + j < bytes.length; j += 1) {
+        hex += bytes[i + j].toString(16).padStart(2, '0');
+        hex += j % 2 == 0 ? '' : ' '
+
+        if (bytes[i + j] >= 0x20 && bytes[i + j] < 0x80) {
+            ascii += String.fromCharCode(bytes[i + j])
+        } else {
+            ascii += "."
+        }
+    }
+    hex = hex.padEnd((4 + 1) * 8, ' ')
+
+    lines += offset + ": " + hex + "  " + ascii + "\n";
+}
+lines = lines.trim();
+---
+<span class="box">File: <a href={link}>{path.posix.basename(filepath)}</a></span>
+<pre>
+<code class="plaintext" set:html={lines}></code>
+</pre>

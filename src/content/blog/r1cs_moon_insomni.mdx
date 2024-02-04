@@ -1,0 +1,258 @@
+---
+title: "To the Moon - insomnihack 2024 teaser "
+description: "giving context for solving 'To the moon' challenge."
+pubDate: "Feb 04 2024"
+---
+
+import HexDump from '../../components/Hexdump.astro'
+import ImportantNote from '../../components/ImportantNote.astro'
+import 'katex/dist/katex.min.css';
+
+
+This is a write-up of the crypto-ctf challenge 'To The Moon' from insomnihack 2024 teaser.
+I worked on this with my teammate [P3taByte](https://twitter.com/0xp374).
+
+# Challenge Handout
+
+We are given a r1cs-file which somehow encodes the flag.
+<HexDump filename="insomni24/flag_constraints-c4328e47faf6ab5667ee70ac2f1e7225324f519aec5a525ad29de428432dcb17.r1cs"/>
+
+# Some Preliminaries
+
+r1cs find their use in Non-interactive zero-knowledge proofs.
+
+## What are zero-knowledge proofs.
+
+Please keep in mind that this written from the perspective 
+from a zk-noob. That means you are legally obliged to report any inaccuracies to 
+me!
+
+Non-interactive zero-knowledge proofs find widespread use in the cryptography/cryptocurrency world.
+Their basic premise is that a 'prover' is trying to proof knowledge of a factoid to an outside party, the verifier, without leaking any information about the factoid. 
+
+How is this seemingly-paradoxical feat accomplished in practice? 
+
+Lots of black-magic moon math, that is better explained elsewhere.
+
+## Why zksnarks, What?
+
+zk-snarks are zero-knowledge proofs satisfying special properties.
+zk-snarks in turn find their use in the crypto(currency) world.
+
+The r1cs format finds its use in the pipeline for building zk-snarks.
+![Shamelessy ripped from vitalik blog post who in turn ripped it from Eran Tromer](/insomni24/pipeline.webp)
+
+## Why Circuits, What?
+
+Q: What exactly does the prover want to convince the verifier of?
+
+A: The zk-people use circuits to express the statements that the prover will
+   prove to the verifier.
+
+It makes sense to use circuits because they are very powerful and you can 
+express a lot of problems with them.
+
+## Why Polynomials, What?
+
+zk-snarks encode the computation that prover wants to prove to the 
+verifier in an arithmetic circuit.
+Arithmetic circuits are basically just circuits that evaluate polynomials.
+
+## What is r1cs?
+
+Now it is time to define the r1cs. Short for **R**ank-**1** **C**onstraint **S**ystem (r1cs).
+
+<ImportantNote> All math operations are done module a prime p, unless stated otherwise </ImportantNote>
+
+For an r1cs we need:
+- coefficient vectors $a, b, c$ in some prime field
+- vector of unknowns $x$
+
+This is the system of constraints:
+$$
+\langle a, x \rangle  \langle b, x \rangle = \langle c, x \rangle 
+$$
+that people call r1cs.
+
+## The challenge
+
+The file `flag_constraints-c4328e47faf6ab5667ee70ac2f1e7225324f519aec5a525ad29de428432dcb17.r1cs` comes in the r1cs format which is understood by the
+[snarkjs](https://github.com/iden3/snarkjs) tool.
+Let's inspect it.
+
+The format 
+
+```
+louis@bounce:~/insomni/moon$ snarkjs r1cs export json flag_constraints-c4328e47faf6ab5667ee70ac2f1e7225324f519aec5a525ad29de428432dcb17.r1cs lmao.json
+[INFO]  snarkJS: undefined: Loading constraints: 0/1
+[INFO]  snarkJS: undefined: Loading map: 0/2
+louis@bounce:~/insomni/moon$ cat lmao.json 
+{
+ "n8": 32,
+ "prime": "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+ "nVars": 2,
+ "nOutputs": 0,
+ "nPubInputs": 1,
+ "nPrvInputs": 0,
+ "nLabels": 2,
+ "nConstraints": 1,
+ "useCustomGates": false,
+ "constraints": [
+  [
+   {
+    "1": "21888242871839275222246405745257275088548364400416034343698204186575808495616"
+   },
+   {
+    "1": "1"
+   },
+   {
+    "0": "7358504996770508486687187130827958137520805565857056985433965719766776637594"
+   }
+  ]
+ ],
+ "map": [
+  0,
+  1
+ ],
+ "customGates": [
+ ],
+ "customGatesUses": [
+ ]
+```
+
+The filename of the handout already hints at the flag being hidden in the constraints. 
+Let's take a closer look. First we need to understand how polynomials (arithmetic)
+circuits are converted to constraints. 
+
+# How exactly do I encode a polynomial into a r1cs?
+We are going to start with a polynomial (arithmetic circuit) and then convert it into arithmetic circuit.
+Let's say we want to encode the following constraint:
+
+$$
+x^{2} - 16 = 0
+$$
+
+We will begin by flattening this expression. How do you do that?
+Here also visualised as a tree:
+![A tree with three leaf-nodes expressing the polynomial x^2 - 16](/insomni24/tree.png)
+
+First step is to flatten the polynomial expression.
+By flatten we mean: Introduce new variables such that the original polynomial 
+equation can be written as formulaes of the form 
+
+$$
+a = b \text{ op } c 
+$$
+$$
+x = y
+$$
+
+which in our example boils down to 
+
+$$
+x_2 = x_1 * x_1
+$$
+$$
+x_3 = x_2 - 16
+$$
+
+The individual flattend operations are called gates!
+We now have four different variables $x =(x_0, x_1, x_2, x_3)$ and two gates.
+
+<ImportantNote> We explicitely set $x_0 = 1$, else we would not be able to express adding/subtracting constants in a R1Cs  </ImportantNote>
+
+Each of these gates we will
+turn into a R1CS.
+That means 2 R1CS where the vectors $a$, $b$, $c$ and $x$ are 4-dimensional.
+Remember in R1CS:
+$$
+\langle a, x \rangle  \langle b, x \rangle = \langle c, x \rangle 
+$$
+Let's figure out what values $a$, $b$ and $c$ take on. 
+
+
+| Gate                | Value of $a$ | Value of $b$ | Value of $c$ |
+| ---------------     | ------------ |------------- |------------- |
+| $x_2 = x_1 * x_1 $  | $(0, 1, 0, 0)$ |  $(0, 1, 0, 0)$ | $(0, 0, 1, 0)$ |
+| $x_3 = x_2 - 16$    | $(0, 0, 1, 0)$ |  $(-16, 0, 0, 0)$ | $(0, 0, 0, 1)$ | 
+
+We did it! 
+This format can now be used for further processing in the zk-snark pipeline.
+Next steps would be to turn this into a QAP (Quadratic Arithmetic Program).
+You can read more on that in this blogpost by Vitalik Buterin: [Quadratic Arithmetic Programs: from Zero to Hero](https://medium.com/@VitalikButerin/quadratic-arithmetic-programs-from-zero-to-hero-f6d558cea649)
+
+## Solving that challenge
+
+Recall that in the challenge we get a r1cs 
+```
+{
+ "n8": 32,
+ "prime": "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+ "nVars": 2,
+ "nOutputs": 0,
+ "nPubInputs": 1,
+ "nPrvInputs": 0,
+ "nLabels": 2,
+ "nConstraints": 1,
+ "useCustomGates": false,
+ "constraints": [
+  [
+   {
+    "1": "21888242871839275222246405745257275088548364400416034343698204186575808495616"
+   },
+   {
+    "1": "1"
+   },
+   {
+    "0": "7358504996770508486687187130827958137520805565857056985433965719766776637594"
+   }
+  ]
+ ],
+ "map": [
+  0,
+  1
+ ],
+ "customGates": [
+ ],
+ "customGatesUses": [
+ ]
+```
+
+Let's look at the constraints more closely:
+```
+ "constraints": [
+  [
+   {
+    "1": "21888242871839275222246405745257275088548364400416034343698204186575808495616"
+   },
+   {
+    "1": "1"
+   },
+   {
+    "0": "7358504996770508486687187130827958137520805565857056985433965719766776637594"
+   }
+  ]
+],
+```
+
+This encodes the constraint: 
+
+$$
+- x_{1}^{2} + 7358504996770508486687187130827958137520805565857056985433965719766776637594 x_0 = 0
+$$
+
+
+We mostly figured this out by guessing/experimenting with constraints of 
+small example circuits I wrote in [circom](https://docs.circom.io/circom-language/)
+
+Again $x_0 = 1$ because elsewise you can not add/subtract constants.
+With $x_0 = 1$ this is a constraint, we can easily solve in sage:
+```
+F = GF(21888242871839275222246405745257275088548364400416034343698204186575808495617);
+
+R.<x> = PolynomialRing(F);
+(- x * x - 7358504996770508486687187130827958137520805565857056985433965719766776637594).roots();
+```
+
+convert both root's bytes to ascii and observe flag in one of them.
+Flag is `b'INS{Nothing_to_hide_in_R1CS!!!}'`
