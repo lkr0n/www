@@ -2,7 +2,7 @@ from Crypto.Cipher import ChaCha20
 
 # open the suspicious text file and read in its contents
 with open("SuspiciousFile.txt.Encrypted", "rb") as thing:
-    thing = bytearray(thing.read())
+    material = bytearray(thing.read())
 
 # define helper function that splits the indexable object `it` at index `idx`
 split = lambda it, idx : (it[:idx], it[idx:])
@@ -10,18 +10,18 @@ split = lambda it, idx : (it[:idx], it[idx:])
 # parse the data from the back to front 
 
 # find the encrypted key that was used for the ChaCha20 encryption
-assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
-thing, encrypted_key = split(thing, -256)
+assert material.pop() == 0xa, "Invalid seperator, must be 0xa"
+material, encrypted_key = split(material, -256)
 
-assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
-thing, _ = split(thing, -256)
+assert material.pop() == 0xa, "Invalid seperator, must be 0xa"
+material, _ = split(material, -256)
 
 # find the rsa-parameter n
-assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
-thing, n = split(thing, -256)
+assert material.pop() == 0xa, "Invalid seperator, must be 0xa"
+material, n = split(material, -256)
 
-assert thing.pop() == 0xa, "Invalid seperator, must be 0xa"
-encrypted_data, _ = split(thing, -256)
+assert material.pop() == 0xa, "Invalid seperator, must be 0xa"
+encrypted_data, _ = split(material, -256)
 
 # rsa-decrypt the key, nonce and counter to-be-used for the ChaCha20 computations 
 n = int(n.decode("utf-8"), 16)
