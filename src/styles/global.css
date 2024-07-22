@@ -1,6 +1,5 @@
 html {
     font-family: 'Noto Serif Variable', sans-serif;
-    font-size: 1rem;
     word-break: break-word;
 }
 
@@ -36,8 +35,15 @@ h1 {
 }
 
 h2 {
-    font-size: 1.25rem;
     font-family: "Noto Sans";
+}
+
+h3 {
+    font-family: "Noto Sans";
+}
+
+li > p {
+    margin: 8px;
 }
 
 header {
@@ -110,4 +116,14 @@ img {
 .math-display {
     overflow: auto;
     height: 100%;
+}
+
+a[href*="wikipedia.org"]::after {
+    content: url("/wiki.svg");
+    display: inline-block;
+    height:100%;
+    width:100%;
+    max-width: 1em;
+    max-height: 1em;
+    padding: 2px;
 }

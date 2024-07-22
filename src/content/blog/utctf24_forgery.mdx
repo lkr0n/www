@@ -1,0 +1,117 @@
+---
+title: "utCTF 2023 - Forgery - Writeup"
+description: "Write up of the 'Forgery' crypto-challenge"
+pubDate: "April 01 2024"
+draft: true
+---
+
+import CodeFile from '../../components/CodeFile.astro';
+import 'katex/dist/katex.min.css';
+
+This easter weekend I was playing [utctf](https://utctf.live) with [Zer0Tolerance]().
+We ended up coming 4th place. During the competition I solved the 'Forgery' cryto-challenge, the writeup of which you are reading right now.
+
+## Table of Contents
+{/* to be filled in by the remark-toc plugin */}
+
+# Challenge Description
+
+> "This is a forgery." "I have no idea what you are talking about." "DETAIN"
+>
+> Note: this is both a crypto and rev chall
+>
+> By Jeriah (@jyu on discord)
+>
+> nc betta.utctf.live 8634 
+
+## Challenge Handout
+
+| Handout | Comment         |
+|---------|-----------------|
+| forgery | 64-bit ELF stripped challenge binary |
+| forgery_nostrip | 64-bit ELF challenge binary |
+| betta.utctf.live 8634 | server running the challenge binary |
+
+
+At first only a stripped ELF binary was provided but over the course of the 
+ctf the non-stripped binary was released as well. 
+As I exclusively worked on the symbolized binary, this write-up will
+revolve around the binary containg symbols.
+
+# First look at the binary
+
+Executing the challenge binary prints a cryptic hex string representing
+96 bytes. The user may then enter their own input.
+
+All the relevant code is contained in the main function. A cursory glance 
+reveals a lot of symbols referencing [bls12-381](https://en.wikipedia.org/wiki/BLS_digital_signature#BLS12-381), which is the name to 
+an elliptic curve. Oh boy!
+
+# Explaining the math
+The math going into bls12-381 is too extensive to be explained here in this blog
+and I do not understand it anyway, so I will only review some of the basic
+properties of the bls12-381 and the bls-signature scheme necessary for solving
+the challenge.
+
+## BLS-Signature scheme
+
+The fundamental building blocks of this signature scheme are pairings.  
+I wont go into how they work but here is how they are used in the bls signature scheme
+used in the binary.
+
+### Keys
+
+- Public keys are points on an elliptic curve. 
+
+
+### What is a pairing?
+
+A Pairing is just some bilinear function e:
+
+$$
+e : G_1 \times G_2 \rightarrow G_T
+$$
+
+mapping the points of the elliptic curve $G_1$ and points of the elliptic 
+curve $G_2$ into the group $G_T$.
+
+In case of the BLS-signature scheme the pairing used  
+and the 
+
+That is already all we need to know! For solving the challenge it does not really
+matter  
+
+### How does the signature algorithm work?
+
+
+# Reversing the binary
+
+Googling for c++ bls12_381 libraries, I found 
+[AntelopeIO/bls12-381](https://github.com/AntelopeIO/bls12-381) on github.
+The function signatures and naming lign up neatly with the decompilation. 
+Having found this library was a great help in speeding things up and I even ended
+up using it for solving the challenge.
+
+Reversing the binary I figured out that it
+
+1. generates a public/private key pair from a random seed 
+2. reads in a 192 hex digits representing 96 bytes of public key
+3. reads in 384 hex digits representing 192 bytes of a signature 
+
+
+## Signature Computation
+
+# Solving the challenge
+
+I then wrote a small c++ program that takes bobs public key as an input and 
+spits out the evil publickey along with the forged signature.
+
+Just submit the program output to the challenge server and get the flag.
+
+<CodeFile filename="utctf24/CMakeLists.txt" lang="c++" / >
+
+<CodeFile filename="utctf24/main.cc" lang="c++" / >
+
+
+For running this you will only need a c++ compiler and the [AntelopeIO/bls12-381](https://github.com/AntelopeIO/bls12-381) c++ library in the same folder as 
+the above source files.
